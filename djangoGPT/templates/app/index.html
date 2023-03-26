@@ -1,0 +1,77 @@
+{% extends './base.html' %}
+
+{% block contenido %}
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <form method="post" id="chat-form">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-10">
+                            <input type="text" name="input_text" id="input_text" placeholder="Escribe algo..." class='form-control'>
+                        </div>
+                        <div class="col-1">
+                            <button type="submit" class="btn btn-success">Enviar</button>
+                        </div>
+                        <div class="col-1">
+                            <button type="button" class="btn btn-default" onclick="limpiar()">Limpiar</button>
+                        </div>
+                        
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="row mt-5 visually-hidden" id="div-chat">
+            <div class="col-12">
+                <div id="chat-response" class="h-100 p-5 text-bg-dark rounded-3">
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock contenido %}
+    
+    
+{% block  javascript %}
+    <script>
+        const limpiar = () => {
+            $("#div-chat").addClass('visually-hidden');
+            $("#chat-response").text('');
+            $("#input_text").val('');
+        }
+        $(function() {
+            
+            $('#chat-form').submit(function(event) {
+                event.preventDefault();
+                if(!$("#input_text").val()){
+                    alert('Por favor completar la consulta.')
+                    return false;
+                }
+                $("#div-chat").addClass('visually-hidden');
+                $("#chat-response").text('');
+                $.ajax({
+                    url: '/app/chat/',
+                    type: 'post',
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        $("#div-chat").removeClass('visually-hidden');
+                        let miTexto = response.response;
+                        var miDiv = $("#chat-response");
+                        var i = 0;
+                      
+                        function agregarCaracter() {
+                          miDiv.append(miTexto.charAt(i));
+                          i++;
+                          if (i < miTexto.length) {
+                            setTimeout(agregarCaracter, 5);
+                          }
+                        }
+                      
+                        agregarCaracter();
+
+                    }
+                });
+            });
+        });
+    </script>
+{% endblock  %}
+    
